@@ -326,4 +326,16 @@ public class ConnectXplane {
         int id = getDREFs("sim/cockpit/autopilot/altitude", 3);
         return 0f;
     }
+
+    void localX(String text) throws IOException {
+        sendDREF("sim/flightmodel/position/local_x", Float.parseFloat(text));
+    }
+
+    void localY(String text) throws IOException {
+        sendDREF("sim/flightmodel/position/local_y", Float.parseFloat(text));
+    }
+
+    void localZ(String text) throws IOException {
+        sendDREF("sim/flightmodel/position/local_z", Float.parseFloat(text));
+    }
 }

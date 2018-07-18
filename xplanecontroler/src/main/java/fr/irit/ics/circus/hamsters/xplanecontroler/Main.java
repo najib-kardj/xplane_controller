@@ -28,7 +28,7 @@ public class Main extends javax.swing.JFrame {
         connectXplane = new ConnectXplane();
         initComponents();
         System.err.println("alt" + connectXplane.getAPAlt());
-      /*  new javax.swing.Timer(1500, new ActionListener() {
+        /*  new javax.swing.Timer(1500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -60,6 +60,12 @@ public class Main extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jToggleWarning = new javax.swing.JToggleButton();
         jToggleCaution = new javax.swing.JToggleButton();
+        localx = new javax.swing.JButton();
+        localY = new javax.swing.JButton();
+        localZ = new javax.swing.JButton();
+        lxtf = new javax.swing.JTextField();
+        lytf = new javax.swing.JTextField();
+        lztf = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -103,13 +109,40 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        localx.setText("localX");
+        localx.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localxActionPerformed(evt);
+            }
+        });
+
+        localY.setText("localY");
+        localY.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localYActionPerformed(evt);
+            }
+        });
+
+        localZ.setText("localZ");
+        localZ.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localZActionPerformed(evt);
+            }
+        });
+
+        lxtf.setText("jTextField4");
+
+        lytf.setText("jTextField5");
+
+        lztf.setText("jTextField6");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)
@@ -130,10 +163,29 @@ public class Main extends javax.swing.JFrame {
                                 .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(62, 62, 62))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jToggleWarning)
-                            .addComponent(jToggleCaution))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(lztf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(localZ))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jToggleWarning)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lxtf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jToggleCaution)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lytf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(10, 10, 10)
+                                .addComponent(localY)))
+                        .addGap(150, 150, 150))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(localx)
+                        .addGap(150, 150, 150))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -156,11 +208,26 @@ public class Main extends javax.swing.JFrame {
                         .addComponent(jLabel3)
                         .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jButton2))
-                .addGap(82, 82, 82)
-                .addComponent(jToggleWarning)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(82, 82, 82)
+                        .addComponent(jToggleWarning)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jToggleCaution))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(99, 99, 99)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(localx)
+                            .addComponent(lxtf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(localY)
+                            .addComponent(lytf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jToggleCaution)
-                .addContainerGap(276, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(localZ)
+                    .addComponent(lztf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(230, Short.MAX_VALUE))
         );
 
         pack();
@@ -207,6 +274,33 @@ public class Main extends javax.swing.JFrame {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jToggleWarningActionPerformed
+
+    private void localxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localxActionPerformed
+        try {
+            // TODO add your handling code here:
+            connectXplane.localX(lxtf.getText());
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_localxActionPerformed
+
+    private void localYActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localYActionPerformed
+        try {
+            // TODO add your handling code here:
+            connectXplane.localY(lytf.getText());
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_localYActionPerformed
+
+    private void localZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localZActionPerformed
+        try {
+            // TODO add your handling code here:
+            connectXplane.localZ(lytf.getText());
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_localZActionPerformed
 
     /**
      * @param args the command line arguments
@@ -260,5 +354,11 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField3;
     private javax.swing.JToggleButton jToggleCaution;
     private javax.swing.JToggleButton jToggleWarning;
+    private javax.swing.JButton localY;
+    private javax.swing.JButton localZ;
+    private javax.swing.JButton localx;
+    private javax.swing.JTextField lxtf;
+    private javax.swing.JTextField lytf;
+    private javax.swing.JTextField lztf;
     // End of variables declaration//GEN-END:variables
 }
