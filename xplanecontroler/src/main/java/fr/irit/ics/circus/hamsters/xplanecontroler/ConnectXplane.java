@@ -274,7 +274,7 @@ public class ConnectXplane {
         sendDREF("sim/cockpit/autopilot/autopilot_mode", 0f);
         Thread.sleep(20);
 
-        sendDREF("sim/cockpit/autopilot/altitude", 2000.0f);
+        sendDREF("sim/cockpit/autopilot/altitude", 0.0f);
         Thread.sleep(20);
         sendDREF("sim/cockpit/radios/com1_freq_hz", 12330.0f);
         Thread.sleep(20);
