@@ -12,10 +12,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,19 +30,39 @@ public class ConnectXplane {
     private final int xplanePort;
     private final InetAddress xplaneAddr;
     private final DatagramSocket socket;
-    private final DatagramSocket listenersocket;
+//    private final DatagramSocket listenersocket;
 
     public ConnectXplane() throws SocketException, UnknownHostException, IOException {
-        this.socket = new MulticastSocket(0);
+        this.socket = new DatagramSocket(0);
+
         this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 66, (byte) 26});
         //      this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 38, (byte) 155});
         this.xplanePort = 49000;
         this.socket.setSoTimeout(1000);  // this.socket.set
         this.socket.setReuseAddress(true);
-        this.listenersocket = new MulticastSocket(49001);
+        //this.socket.s
+        //  this.socket.setReuseAddress(true);
+        //      this.listenersocket = new MulticastSocket(49001);
         //   listenersocket.accept();
         //    this.socket = new DatagramSocket(0);
-        /* new Thread(new Runnable() {
+
+    }
+
+    private void sendUDP(byte[] buffer) throws IOException {
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
+        socket.send(packet);
+    }
+
+    static int cnt = 1;
+
+    private void sendUDPRef(byte[] buffer) throws IOException {
+        int portn = 49500 + cnt++;
+        DatagramSocket socket1 = new DatagramSocket(portn);
+        System.err.println("sdfsdfsdfsdfsdf" + portn);
+        socket1.setReuseAddress(true);
+        socket1.setSoTimeout(1000);
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -48,29 +70,26 @@ public class ConnectXplane {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     try {
                         System.err.println("dsd");
-                        listenersocket.receive(packet);
+                        socket1.receive(packet);
                         // System.err.println(packet.getLength());
                         Arrays.copyOf(buffer, packet.getLength());
                         for (int i = 0; i < packet.getLength(); i++) {
                             System.err.print(Character.toString((char) buffer[i]));
                         }
-                        System.err.println("");
+                        System.err.println("--");
                         //  System.err.println(Character.toString((char) buffer[0]) + " " + Character.toString((char) buffer[1]) + " " +Character.toString((char) buffer[2]));
                     } catch (SocketTimeoutException ex) {
-                        System.err.println("timeout" + ex.getMessage());
+                        //System.err.println("timeout" + ex.getMessage());
                     } catch (IOException ex) {
                         Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                 }
             }
-        })
-                .start();*/
-    }
+        }).start();
+        System.err.println("sending");
+        socket1.send(packet);
 
-    private void sendUDP(byte[] buffer) throws IOException {
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
-        socket.send(packet);
     }
 
     /*
@@ -87,12 +106,6 @@ public class ConnectXplane {
      */
     public void sendDREF(String drefs, float values) throws IOException {
         //Preconditions
-        /* if (drefs == null || drefs.length == 0) {
-            throw new IllegalArgumentException(("drefs must be non-empty."));
-        }*/
- /*if (values == null || values.length != drefs.length) {
-            throw new IllegalArgumentException("values must be of the same size as drefs.");
-        }*/
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         os.write("DREF".getBytes(StandardCharsets.UTF_8));
@@ -101,13 +114,6 @@ public class ConnectXplane {
         String dref = drefs;
         float value = values;
 
-        /* if (dref == null) {
-            throw new IllegalArgumentException("dref must be a valid string.");
-        }
-        if (value == null || value.length == 0) {
-            throw new IllegalArgumentException("value must be non-null and should contain at least one value.");
-        }
-         */
         //Convert drefs to bytes.
         byte[] drefBytes = dref.getBytes(StandardCharsets.UTF_8);
         if (drefBytes.length == 0) {
@@ -147,12 +153,7 @@ public class ConnectXplane {
 
     public int getDREFs(String drefs, int freqHZ) throws IOException {
         //Preconditions
-        /* if (drefs == null || drefs.length == 0) {
-            throw new IllegalArgumentException(("drefs must be non-empty."));
-        }*/
- /*if (values == null || values.length != drefs.length) {
-            throw new IllegalArgumentException("values must be of the same size as drefs.");
-        }*/
+
         int myiD = ID++;
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         os.write("RREF".getBytes(StandardCharsets.UTF_8));
@@ -170,14 +171,6 @@ public class ConnectXplane {
         //   os.write(myiD);
         String dref = drefs;
 
-
-        /* if (dref == null) {
-            throw new IllegalArgumentException("dref must be a valid string.");
-        }
-        if (value == null || value.length == 0) {
-            throw new IllegalArgumentException("value must be non-null and should contain at least one value.");
-        }
-         */
         //Convert drefs to bytes.
         byte[] drefBytes = dref.getBytes(StandardCharsets.UTF_8);
         if (drefBytes.length == 0) {
@@ -187,47 +180,23 @@ public class ConnectXplane {
             throw new IllegalArgumentException("dref must be less than 255 bytes in UTF-8. Are you sure this is a valid dref?");
         }
 
-        //       ByteBuffer bb = ByteBuffer.allocate(4 * 1);
-        //   bb.order(ByteOrder.LITTLE_ENDIAN);
-        //for (int j = 0; j < value.length; ++j) {
-        // bb.putFloat(value);
-        //   }
-        //Build and send message
-        //  os.write(value.length);
-        // os.write(bb.array());
-        ///   os.write(drefBytes.length);
         os.write(drefBytes, 0, drefBytes.length);
         os.write(0);
         os.writeTo(System.out);
-        /*   int size = os.size();
-        for (int i = size; i < 509; i++) {
-            os.write(0x20);
-        }*/
+
         int size = os.size();
         for (int i = size; i < 509; i++) {
             os.write(0x20);
         }
 
-        sendUDP(os.toByteArray());
+        sendUDPRef(os.toByteArray());
         try {
             Thread.sleep(20);
         } catch (InterruptedException ex) {
             Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
         }
-        /*
-        byte[] data = readUDP();
-        if (data.length == 0) {
-            throw new IOException("No response received.");
-        }
-        if (data.length < 6) {
-            throw new IOException("Response too short");
-        }
-        ByteBuffer rbb = ByteBuffer.wrap(data);
-        rbb.order(ByteOrder.LITTLE_ENDIAN);
-        float aFloat = rbb.getFloat();
-         */
         return myiD;
-        /**/
+
     }
 
     void addPAAlt() throws IOException, InterruptedException {
@@ -337,5 +306,17 @@ public class ConnectXplane {
 
     void localZ(String text) throws IOException {
         sendDREF("sim/flightmodel/position/local_z", Float.parseFloat(text));
+    }
+
+    void theta(String text) throws IOException {
+        sendDREF("sim/flightmodel/position/theta", Float.parseFloat(text));
+    }
+
+    void phi(String text) throws IOException {
+        sendDREF("sim/flightmodel/position/phi", Float.parseFloat(text));
+    }
+
+    void psi(String text) throws IOException {
+        sendDREF("sim/flightmodel/position/psi", Float.parseFloat(text));
     }
 }

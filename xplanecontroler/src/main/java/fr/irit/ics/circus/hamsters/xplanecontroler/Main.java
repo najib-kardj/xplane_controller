@@ -66,6 +66,12 @@ public class Main extends javax.swing.JFrame {
         lxtf = new javax.swing.JTextField();
         lytf = new javax.swing.JTextField();
         lztf = new javax.swing.JTextField();
+        localtheta = new javax.swing.JButton();
+        tftheta = new javax.swing.JTextField();
+        loclphi = new javax.swing.JButton();
+        tfphi = new javax.swing.JTextField();
+        localpsi = new javax.swing.JButton();
+        tfpsi = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -136,6 +142,33 @@ public class Main extends javax.swing.JFrame {
 
         lztf.setText("jTextField6");
 
+        localtheta.setText("theta");
+        localtheta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localthetaActionPerformed(evt);
+            }
+        });
+
+        tftheta.setText("jTextField6");
+
+        loclphi.setText("phi");
+        loclphi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loclphiActionPerformed(evt);
+            }
+        });
+
+        tfphi.setText("jTextField6");
+
+        localpsi.setText("psi");
+        localpsi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                localpsiActionPerformed(evt);
+            }
+        });
+
+        tfpsi.setText("jTextField6");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -165,11 +198,6 @@ public class Main extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(lztf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(localZ))
-                            .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jToggleWarning)
@@ -180,7 +208,30 @@ public class Main extends javax.swing.JFrame {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(lytf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(10, 10, 10)
-                                .addComponent(localY)))
+                                .addComponent(localY))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(tftheta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(localtheta))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(lztf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(localZ)))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                                .addComponent(tfpsi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(tfphi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addGap(10, 10, 10)))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(loclphi, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(localpsi, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
                         .addGap(150, 150, 150))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -227,7 +278,19 @@ public class Main extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(localZ)
                     .addComponent(lztf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(230, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(localtheta)
+                    .addComponent(tftheta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(loclphi)
+                    .addComponent(tfphi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(localpsi)
+                    .addComponent(tfpsi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(131, Short.MAX_VALUE))
         );
 
         pack();
@@ -302,6 +365,33 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_localZActionPerformed
 
+    private void localthetaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localthetaActionPerformed
+       try {
+            // TODO add your handling code here:
+            connectXplane.theta(tftheta.getText());
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_localthetaActionPerformed
+
+    private void loclphiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loclphiActionPerformed
+      try {
+            // TODO add your handling code here:
+            connectXplane.phi(tfphi.getText());
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_loclphiActionPerformed
+
+    private void localpsiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_localpsiActionPerformed
+        try {
+            // TODO add your handling code here:
+            connectXplane.psi(tfpsi.getText());
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_localpsiActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -356,9 +446,15 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JToggleButton jToggleWarning;
     private javax.swing.JButton localY;
     private javax.swing.JButton localZ;
+    private javax.swing.JButton localpsi;
+    private javax.swing.JButton localtheta;
     private javax.swing.JButton localx;
+    private javax.swing.JButton loclphi;
     private javax.swing.JTextField lxtf;
     private javax.swing.JTextField lytf;
     private javax.swing.JTextField lztf;
+    private javax.swing.JTextField tfphi;
+    private javax.swing.JTextField tfpsi;
+    private javax.swing.JTextField tftheta;
     // End of variables declaration//GEN-END:variables
 }
