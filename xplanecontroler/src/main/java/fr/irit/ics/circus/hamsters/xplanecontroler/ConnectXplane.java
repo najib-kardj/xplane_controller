@@ -11,14 +11,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.ServerSocket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,18 +28,19 @@ public class ConnectXplane {
     private final int xplanePort;
     private final InetAddress xplaneAddr;
     private final DatagramSocket socket;
-    private final ServerSocket listenersocket;
+    private final DatagramSocket listenersocket;
 
     public ConnectXplane() throws SocketException, UnknownHostException, IOException {
         this.socket = new MulticastSocket(0);
         this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 66, (byte) 26});
+        //      this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 38, (byte) 155});
         this.xplanePort = 49000;
         this.socket.setSoTimeout(1000);  // this.socket.set
         this.socket.setReuseAddress(true);
-        this.listenersocket = new ServerSocket(0/*, xplaneAddr*/);
-     //   listenersocket.accept();
+        this.listenersocket = new MulticastSocket(49001);
+        //   listenersocket.accept();
         //    this.socket = new DatagramSocket(0);
-        new Thread(new Runnable() {
+        /* new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -50,7 +48,7 @@ public class ConnectXplane {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     try {
                         System.err.println("dsd");
-                        socket.receive(packet);
+                        listenersocket.receive(packet);
                         // System.err.println(packet.getLength());
                         Arrays.copyOf(buffer, packet.getLength());
                         for (int i = 0; i < packet.getLength(); i++) {
@@ -67,7 +65,7 @@ public class ConnectXplane {
                 }
             }
         })
-                .start();
+                .start();*/
     }
 
     private void sendUDP(byte[] buffer) throws IOException {
