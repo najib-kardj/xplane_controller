@@ -327,7 +327,7 @@ public class ConnectXplane {
         sendOBJN("Resources/default scenery/sim objects/dynamic/OilRig.obj", 2);
         //
         sendOBJL(1, new double[]{46.189465d, 6.275749d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
-        sendOBJL(2, new double[]{45.738012d, 7.3589444d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
+        sendOBJL(2, new double[]{46.189465d, 6.275745d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
     }
 
     public void addDataRefChangedEventListener(DataRefChangedListener drcel) {
