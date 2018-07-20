@@ -27,68 +27,72 @@ import java.util.logging.Logger;
  */
 public class ConnectXplane {
 
-    private final int xplanePort;
+    private final int xplanePort=49000;
     private final InetAddress xplaneAddr;
     private final DatagramSocket socket;
+    // private final DatagramSocket socket1;
 //    private final DatagramSocket listenersocket;
 
     public ConnectXplane() throws SocketException, UnknownHostException, IOException {
-        this.socket = new DatagramSocket(0);
+        this.socket = new DatagramSocket(49500);
 
         this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 66, (byte) 26});
         //      this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 38, (byte) 155});
-        this.xplanePort = 49000;
-        this.socket.setSoTimeout(1000);  // this.socket.set
-        this.socket.setReuseAddress(true);
+        //this.xplanePort = 49000;
+   //     this.socket.setSoTimeout(1000);  // this.socket.set
+   //     this.socket.setReuseAddress(true);
+   //     this.socket.setBroadcast(true);
+        //    socket1 = new DatagramSocket(49500);//     System.err.println("sdfsdfsdfsdfsdf" + portn);
+        //   socket1.setReuseAddress(true);
+        //   socket1.setSoTimeout(10000);
         //this.socket.s
         //  this.socket.setReuseAddress(true);
         //      this.listenersocket = new MulticastSocket(49001);
         //   listenersocket.accept();
         //    this.socket = new DatagramSocket(0);
 
+        new Thread(() -> {
+
+            byte[] buffer = new byte[65536];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            while (true) {
+                try {
+                    System.err.println("dsd");
+                    socket.receive(packet);
+                    // System.err.println(packet.getLength());
+                    Arrays.copyOf(buffer, packet.getLength());
+                    for (int i = 0; i < packet.getLength(); i++) {
+                        System.err.print(Character.toString((char) buffer[i]));
+                    }
+                    System.err.println("--");
+                    //  System.err.println(Character.toString((char) buffer[0]) + " " + Character.toString((char) buffer[1]) + " " +Character.toString((char) buffer[2]));
+                } catch (SocketTimeoutException ex) {
+                    System.err.println("timeout" + ex.getMessage());
+                } catch (IOException ex) {
+                    Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        }).start();
     }
 
     private void sendUDP(byte[] buffer) throws IOException {
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
+       // packet.setData(buffer);
         socket.send(packet);
     }
 
     static int cnt = 1;
 
     private void sendUDPRef(byte[] buffer) throws IOException {
-        int portn = 49500 + cnt++;
-        DatagramSocket socket1 = new DatagramSocket(portn);
-        System.err.println("sdfsdfsdfsdfsdf" + portn);
-        socket1.setReuseAddress(true);
-        socket1.setSoTimeout(1000);
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    byte[] buffer = new byte[65536];
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    try {
-                        System.err.println("dsd");
-                        socket1.receive(packet);
-                        // System.err.println(packet.getLength());
-                        Arrays.copyOf(buffer, packet.getLength());
-                        for (int i = 0; i < packet.getLength(); i++) {
-                            System.err.print(Character.toString((char) buffer[i]));
-                        }
-                        System.err.println("--");
-                        //  System.err.println(Character.toString((char) buffer[0]) + " " + Character.toString((char) buffer[1]) + " " +Character.toString((char) buffer[2]));
-                    } catch (SocketTimeoutException ex) {
-                        //System.err.println("timeout" + ex.getMessage());
-                    } catch (IOException ex) {
-                        Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+        int portn = 49500;
+        //      DatagramSocket socket1 = new DatagramSocket(portn);
 
-                }
-            }
-        }).start();
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
+        //packet.setData(buffer);
+
         System.err.println("sending");
-        socket1.send(packet);
+        socket.send(packet);
 
     }
 
@@ -138,7 +142,7 @@ public class ConnectXplane {
 
         int size = os.size();
         for (int i = size; i < 509; i++) {
-            os.write(0x20);
+            os.write(0x00);
         }
 
         // System.err.println(os.size());
@@ -182,14 +186,18 @@ public class ConnectXplane {
 
         os.write(drefBytes, 0, drefBytes.length);
         os.write(0);
-        os.writeTo(System.out);
+        // os.writeTo(System.out);
 
         int size = os.size();
-        for (int i = size; i < 509; i++) {
-            os.write(0x20);
+        for (int i = size; i < 413; i++) {
+            os.write(0x00);
         }
 
         sendUDPRef(os.toByteArray());
+
+        for (byte b : os.toByteArray()) {
+            //       System.err.println(Integer.toHexString(b));
+        }
         try {
             Thread.sleep(20);
         } catch (InterruptedException ex) {

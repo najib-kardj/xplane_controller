@@ -5,8 +5,6 @@
  */
 package fr.irit.ics.circus.hamsters.xplanecontroler;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
