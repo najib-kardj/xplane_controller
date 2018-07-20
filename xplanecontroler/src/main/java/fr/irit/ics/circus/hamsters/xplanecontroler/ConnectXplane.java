@@ -5,19 +5,21 @@
  */
 package fr.irit.ics.circus.hamsters.xplanecontroler;
 
+import fr.irit.ics.circus.hamsters.xplanecontroler.events.DataRefChangedEvent;
+import fr.irit.ics.circus.hamsters.xplanecontroler.events.DataRefChangedListener;
+import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,304 +29,207 @@ import java.util.logging.Logger;
  */
 public class ConnectXplane {
 
-    private final int xplanePort=49000;
-    private final InetAddress xplaneAddr;
+    private final int xplaneSendingPort = 49000;
+    private final int xplaneReceivingPort = 49500;
+    private final InetAddress xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 66, (byte) 26});
     private final DatagramSocket socket;
-    // private final DatagramSocket socket1;
-//    private final DatagramSocket listenersocket;
+
+    private Map<Integer, Pair<String, Float>> subscribedDataRef = new HashMap<>();
+
+    private final List<DataRefChangedListener> listeners = new ArrayList<>();
 
     public ConnectXplane() throws SocketException, UnknownHostException, IOException {
-        this.socket = new DatagramSocket(49500);
-
-        this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 66, (byte) 26});
-        //      this.xplaneAddr = InetAddress.getByAddress(new byte[]{(byte) 141, (byte) 115, (byte) 38, (byte) 155});
-        //this.xplanePort = 49000;
-   //     this.socket.setSoTimeout(1000);  // this.socket.set
-   //     this.socket.setReuseAddress(true);
-   //     this.socket.setBroadcast(true);
-        //    socket1 = new DatagramSocket(49500);//     System.err.println("sdfsdfsdfsdfsdf" + portn);
-        //   socket1.setReuseAddress(true);
-        //   socket1.setSoTimeout(10000);
-        //this.socket.s
-        //  this.socket.setReuseAddress(true);
-        //      this.listenersocket = new MulticastSocket(49001);
-        //   listenersocket.accept();
-        //    this.socket = new DatagramSocket(0);
-
+        this.socket = new DatagramSocket(xplaneReceivingPort);
         new Thread(() -> {
-
-            byte[] buffer = new byte[65536];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             while (true) {
-                try {
-                    System.err.println("dsd");
-                    socket.receive(packet);
-                    // System.err.println(packet.getLength());
-                    Arrays.copyOf(buffer, packet.getLength());
-                    for (int i = 0; i < packet.getLength(); i++) {
-                        System.err.print(Character.toString((char) buffer[i]));
-                    }
-                    System.err.println("--");
-                    //  System.err.println(Character.toString((char) buffer[0]) + " " + Character.toString((char) buffer[1]) + " " +Character.toString((char) buffer[2]));
-                } catch (SocketTimeoutException ex) {
-                    System.err.println("timeout" + ex.getMessage());
-                } catch (IOException ex) {
-                    Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
+                receive();
             }
         }).start();
     }
 
-    private void sendUDP(byte[] buffer) throws IOException {
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
-       // packet.setData(buffer);
-        socket.send(packet);
-    }
-
-    static int cnt = 1;
-
-    private void sendUDPRef(byte[] buffer) throws IOException {
-        int portn = 49500;
-        //      DatagramSocket socket1 = new DatagramSocket(portn);
-
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplanePort);
-        //packet.setData(buffer);
-
-        System.err.println("sending");
-        socket.send(packet);
-
-    }
-
-    /*
-    private byte[] readUDP() throws IOException {
-        byte[] buffer = new byte[65536];
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+    private void receive() {
+        byte[] receive = new byte[65535];
+        DatagramPacket recu = new DatagramPacket(receive, receive.length);
         try {
-            socket.receive(packet);
-            return Arrays.copyOf(buffer, packet.getLength());
-        } catch (SocketTimeoutException ex) {
-            return new byte[0];
+            socket.receive(recu);
+            int i = 5;
+            while (i < recu.getLength()) {
+                int receivedID = (int) receive[i] + 256 * (int) receive[i + 1] + 65536 * (int) receive[i + 2] + 16777216 * (int) receive[i + 3];
+                byte[] wrappedValue = new byte[]{receive[i + 4], receive[i + 5], receive[i + 6], receive[i + 7]};
+                float theValue = ByteBuffer.wrap(wrappedValue).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                if (!subscribedDataRef.containsKey(receivedID)) {
+                    System.err.println("Invalid ID");
+                } else {
+                    subscribedDataRef.get(receivedID).setSecond(theValue);
+                    DataRefChangedEvent event = new DataRefChangedEvent(this, receivedID, subscribedDataRef.get(receivedID).getFirst(), subscribedDataRef.get(receivedID).getSecond());
+                    for (DataRefChangedListener listener : listeners) {
+                        listener.dataRefChanged(event);
+                    }
+                }
+                //System.err.println("ID [" + received + "] Value = " + theValue);
+                i += 8;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-     */
-    public void sendDREF(String drefs, float values) throws IOException {
+
+    public void sendDataRef(String dataRef, float values) throws IOException {
         //Preconditions
-
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        os.write("DREF".getBytes(StandardCharsets.UTF_8));
-        os.write(0x00); //Placeholder for message length
-
-        String dref = drefs;
+        String prolog = "DREF" + ((char) 0);
+        os.write(prolog.getBytes(), 0, 5);
         float value = values;
-
         //Convert drefs to bytes.
-        byte[] drefBytes = dref.getBytes(StandardCharsets.UTF_8);
-        if (drefBytes.length == 0) {
-            throw new IllegalArgumentException("DREF is an empty string!");
+        ByteBuffer bbValue = ByteBuffer.allocate(4 * 1);
+        bbValue.order(ByteOrder.LITTLE_ENDIAN);
+        bbValue.putFloat(value);
+        // write float to array
+        os.write(bbValue.array());
+        // write dataregf
+        os.write(dataRef.getBytes(), 0, dataRef.getBytes().length);
+        for (int k = 0; k < 500 - dataRef.length(); k++) {
+            os.write((char) 0);
         }
-        if (drefBytes.length > 255) {
-            throw new IllegalArgumentException("dref must be less than 255 bytes in UTF-8. Are you sure this is a valid dref?");
-        }
-
-        ByteBuffer bb = ByteBuffer.allocate(4 * 1);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-        //for (int j = 0; j < value.length; ++j) {
-        bb.putFloat(value);
-        //   }
-
-        //Build and send message
-        //  os.write(value.length);
-        os.write(bb.array());
-        ///   os.write(drefBytes.length);
-        os.write(drefBytes, 0, drefBytes.length);
-        os.write(0);
-
-        int size = os.size();
-        for (int i = size; i < 509; i++) {
-            os.write(0x00);
-        }
-
-        // System.err.println(os.size());
-        sendUDP(os.toByteArray());
         try {
+            sendUDP(os.toByteArray());
             Thread.sleep(20);
         } catch (InterruptedException ex) {
             Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    static int ID;
 
-    public int getDREFs(String drefs, int freqHZ) throws IOException {
-        //Preconditions
-
-        int myiD = ID++;
+    public void subscribeToDataRef(int idref, String dataRef, int frequency) throws IOException {
+        if (subscribedDataRef.containsKey(idref)) {
+            throw new IllegalStateException("ID " + idref + " already in use for DataRef " + subscribedDataRef.get(idref).getFirst() + ".");
+        } else {
+            subscribedDataRef.put(idref, new Pair<>(dataRef, 0.f));
+        }
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        os.write("RREF".getBytes(StandardCharsets.UTF_8));
-        os.write(0x00); //Placeholder for message length
-        // freq
-        os.write(0x01);
-        os.write(0x00);
-        os.write(0x00);
-        os.write(0x00);
-//id
-        os.write(0x05);
-        os.write(0x00);
-        os.write(0x00);
-        os.write(0x00);
-        //   os.write(myiD);
-        String dref = drefs;
-
-        //Convert drefs to bytes.
-        byte[] drefBytes = dref.getBytes(StandardCharsets.UTF_8);
-        if (drefBytes.length == 0) {
-            throw new IllegalArgumentException("DREF is an empty string!");
-        }
-        if (drefBytes.length > 255) {
-            throw new IllegalArgumentException("dref must be less than 255 bytes in UTF-8. Are you sure this is a valid dref?");
-        }
-
-        os.write(drefBytes, 0, drefBytes.length);
-        os.write(0);
-        // os.writeTo(System.out);
-
-        int size = os.size();
-        for (int i = size; i < 413; i++) {
-            os.write(0x00);
-        }
-
-        sendUDPRef(os.toByteArray());
-
-        for (byte b : os.toByteArray()) {
-            //       System.err.println(Integer.toHexString(b));
+        String prolog = "RREF" + ((char) 0);
+        os.write(prolog.getBytes(), 0, 5);
+        ByteBuffer bbRef = ByteBuffer.allocate(4 * 1);
+        bbRef.order(ByteOrder.LITTLE_ENDIAN);
+        bbRef.putInt(frequency);
+        os.write(bbRef.array());
+        ByteBuffer bbID = ByteBuffer.allocate(4 * 1);
+        bbID.order(ByteOrder.LITTLE_ENDIAN);
+        bbID.putInt(idref);
+        os.write(bbID.array());
+        os.write(dataRef.getBytes(), 0, dataRef.getBytes().length);
+        for (int k = 0; k < 400 - dataRef.length(); k++) {
+            os.write((char) 0);
         }
         try {
+            sendUDP(os.toByteArray());
             Thread.sleep(20);
-        } catch (InterruptedException ex) {
+        } catch (IOException | InterruptedException ex) {
             Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return myiD;
+    }
 
+    private void sendUDP(byte[] buffer) throws IOException {
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, xplaneAddr, xplaneSendingPort);
+        socket.send(packet);
     }
 
     void addPAAlt() throws IOException, InterruptedException {
         System.err.println("sending alt to autopilot");
-        /*"sim/cockpit/autopilot/altitude", 620.0f
-         String dref = "sim/cockpit/switches/gear_handle_status";
-    float[] value = {0.0F};
-         */
-        sendDREF("sim/cockpit/autopilot/altitude", 2000.0f);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/radios/com1_freq_hz", 12330.0f);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/radios/com2_freq_hz", 12330.0f);
-        Thread.sleep(20);
 
-        sendDREF("sim/cockpit/autopilot/autopilot_mode", 2f);
-        Thread.sleep(20);
+        sendDataRef("sim/cockpit/autopilot/altitude", 2000.0f);
+
+        sendDataRef("sim/cockpit/radios/com1_freq_hz", 12330.0f);
+        sendDataRef("sim/cockpit/radios/com2_freq_hz", 12330.0f);
+
+        sendDataRef("sim/cockpit/autopilot/autopilot_mode", 2f);
         float value = 1;
 
-        sendDREF("sim/operation/override/override_annunciators", value);
-        Thread.sleep(20);
+        sendDataRef("sim/operation/override/override_annunciators", value);
 
         /*sendDREF("sim/cockpit/warnings/annunciator_test_pressed", value);
         Thread.sleep(20);*/
-        sendDREF("sim/cockpit/warnings/master_caution_on", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/warnings/master_warning_on", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/warnings/annunciators/master_caution", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/warnings/annunciators/master_warning", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit2/annunciators/master_caution", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit2/annunciators/master_warning", value);
-        Thread.sleep(20);
-        /* sendDREF("sim/flightmodel/failures/stallwarning", value);
-        Thread.sleep(20);*/
+        sendDataRef("sim/cockpit/warnings/master_caution_on", value);
+        sendDataRef("sim/cockpit/warnings/master_warning_on", value);
+        sendDataRef("sim/cockpit/warnings/annunciators/master_caution", value);
+        sendDataRef("sim/cockpit/warnings/annunciators/master_warning", value);
+        sendDataRef("sim/cockpit2/annunciators/master_caution", value);
+        sendDataRef("sim/cockpit2/annunciators/master_warning", value);
 
     }
 
     void removePAAlt() throws IOException, InterruptedException {
         System.err.println("sending low to autopilot");
-        sendDREF("sim/cockpit/autopilot/autopilot_mode", 0f);
-        Thread.sleep(20);
+        sendDataRef("sim/cockpit/autopilot/autopilot_mode", 0f);
 
-        sendDREF("sim/cockpit/autopilot/altitude", 0.0f);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/radios/com1_freq_hz", 12330.0f);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/radios/com1_freq_hz", 12330.0f);
-        Thread.sleep(20);
+        sendDataRef("sim/cockpit/autopilot/altitude", 0.0f);
+        sendDataRef("sim/cockpit/radios/com1_freq_hz", 12330.0f);
+        sendDataRef("sim/cockpit/radios/com1_freq_hz", 12330.0f);
 
-        sendDREF("sim/cockpit/radios/com1_freq_hz", 12430.0f);
-        Thread.sleep(20);
+        sendDataRef("sim/cockpit/radios/com1_freq_hz", 12430.0f);
         float value = 0;
 
-        /*sendDREF("sim/cockpit/warnings/annunciator_test_pressed", value);
-        Thread.sleep(20);*/
-        sendDREF("sim/cockpit/warnings/master_caution_on", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/warnings/master_warning_on", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/warnings/annunciators/master_caution", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit/warnings/annunciators/master_warning", value);
-        Thread.sleep(20);
-        sendDREF("sim/cockpit2/annunciators/master_caution", value);
-        Thread.sleep(20);
+        sendDataRef("sim/cockpit/warnings/master_caution_on", value);
+        sendDataRef("sim/cockpit/warnings/master_warning_on", value);
+        sendDataRef("sim/cockpit/warnings/annunciators/master_caution", value);
+        sendDataRef("sim/cockpit/warnings/annunciators/master_warning", value);
+        sendDataRef("sim/cockpit2/annunciators/master_caution", value);
 
-        sendDREF("sim/operation/override/override_annunciators", value);
-        Thread.sleep(20);
-        /*   sendDREF("sim/flightmodel/failures/stallwarning", value);
-        Thread.sleep(20);*/
+        sendDataRef("sim/operation/override/override_annunciators", value);
+
     }
 
     void masterCaution(boolean cc) throws IOException {
 
         float value = (cc) ? 1.0f : 0.0f;
-        sendDREF("sim/operation/override/override_annunciators", 1.0f);
-        sendDREF("sim/cockpit/warnings/master_caution_on", value);
-        sendDREF("sim/cockpit/warnings/annunciators/master_caution", value);
+        sendDataRef("sim/operation/override/override_annunciators", 1.0f);
+        sendDataRef("sim/cockpit/warnings/master_caution_on", value);
+        sendDataRef("sim/cockpit/warnings/annunciators/master_caution", value);
 
     }
 
     void masterWarning(boolean cc) throws IOException {
 
         float value = (cc) ? 1.0f : 0.0f;
-        sendDREF("sim/operation/override/override_annunciators", 1.0f);
-        sendDREF("sim/cockpit/warnings/master_warning_on", value);
-        sendDREF("sim/cockpit/warnings/annunciators/master_warning", value);
+        sendDataRef("sim/operation/override/override_annunciators", 1.0f);
+        sendDataRef("sim/cockpit/warnings/master_warning_on", value);
+        sendDataRef("sim/cockpit/warnings/annunciators/master_warning", value);
 
     }
 
     float getAPAlt() throws IOException {
-        int id = getDREFs("sim/cockpit/autopilot/altitude", 3);
+        //subscribeToDataRef((byte) 3, "sim/cockpit/autopilot/altitude", (byte) 1);
         return 0f;
     }
 
     void localX(String text) throws IOException {
-        sendDREF("sim/flightmodel/position/local_x", Float.parseFloat(text));
+        sendDataRef("sim/flightmodel/position/local_x", Float.parseFloat(text));
     }
 
     void localY(String text) throws IOException {
-        sendDREF("sim/flightmodel/position/local_y", Float.parseFloat(text));
+        sendDataRef("sim/flightmodel/position/local_y", Float.parseFloat(text));
     }
 
     void localZ(String text) throws IOException {
-        sendDREF("sim/flightmodel/position/local_z", Float.parseFloat(text));
+        sendDataRef("sim/flightmodel/position/local_z", Float.parseFloat(text));
     }
 
     void theta(String text) throws IOException {
-        sendDREF("sim/flightmodel/position/theta", Float.parseFloat(text));
+        sendDataRef("sim/flightmodel/position/theta", Float.parseFloat(text));
     }
 
     void phi(String text) throws IOException {
-        sendDREF("sim/flightmodel/position/phi", Float.parseFloat(text));
+        sendDataRef("sim/flightmodel/position/phi", Float.parseFloat(text));
     }
 
     void psi(String text) throws IOException {
-        sendDREF("sim/flightmodel/position/psi", Float.parseFloat(text));
+        sendDataRef("sim/flightmodel/position/psi", Float.parseFloat(text));
+    }
+
+    public void addDataRefChangedEventListener(DataRefChangedListener drcel) {
+        listeners.add(drcel);
+    }
+
+    public void removeDataRefChangedEventListener(DataRefChangedListener drcel) {
+        listeners.remove(drcel);
     }
 }
