@@ -99,6 +99,45 @@ public class ConnectXplane {
         }
     }
 
+    private void sendDATA(int id, float[] f) throws IOException {
+        assert f.length == 8;
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        String prolog = "DATA" + ((char) 0);
+        os.write(prolog.getBytes(), 0, 5);
+        ByteBuffer bbindex = ByteBuffer.allocate(4 * 1);
+        bbindex.order(ByteOrder.LITTLE_ENDIAN);
+        bbindex.putInt(id);
+        // write float to array
+        os.write(bbindex.array());
+        for (float ff : f) {
+            ByteBuffer bbValue = ByteBuffer.allocate(4 * 1);
+            bbValue.order(ByteOrder.LITTLE_ENDIAN);
+            bbValue.putFloat(ff);
+            // write float to array
+            os.write(bbValue.array());
+        }
+        try {
+            sendUDP(os.toByteArray());
+            Thread.sleep(20);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void sendCMD(String simflight_controls) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        String prolog = "CMND" + ((char) 0);
+        os.write(prolog.getBytes(), 0, 5);
+        os.write(simflight_controls.getBytes(), 0, simflight_controls.getBytes().length);
+        os.write((char) 0);
+        try {
+            sendUDP(os.toByteArray());
+            Thread.sleep(20);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ConnectXplane.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void sendOBJN(String resourceslocation, int id) throws IOException {
         //Preconditions
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -336,6 +375,12 @@ public class ConnectXplane {
 
     public void removeDataRefChangedEventListener(DataRefChangedListener drcel) {
         listeners.remove(drcel);
+    }
+
+    void brakes() throws IOException {
+// 25 for throttle
+        sendDATA(25, new float[]{100, 0, 0, 0, 0, 0, 0, 0});
+        sendCMD("sim/flight_controls/brakes_toggle_regular");
     }
 
 }
