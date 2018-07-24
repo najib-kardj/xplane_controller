@@ -109,7 +109,7 @@ public class ConnectXplane {
                 //System.err.println("" + minlat + ":" + maxlat + ", " + minlon + ":" + maxlon + "");
                 //maxlat = Math.max(lat, maxlat);
             } else if (recuz.equals("RPOS")) {
-                System.err.println("++" + recu.getLength());
+           //     System.err.println("++" + recu.getLength());
                 planeposition.setValid(true);
                 int i = 5;
                 byte[] wrappedDatLon = new byte[]{receive[i], receive[i + 1], receive[i + 2], receive[i + 3], receive[i + 4], receive[i + 5], receive[i + 6], receive[i + 7]};
