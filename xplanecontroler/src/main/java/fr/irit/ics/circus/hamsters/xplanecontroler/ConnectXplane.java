@@ -109,7 +109,7 @@ public class ConnectXplane {
                 //System.err.println("" + minlat + ":" + maxlat + ", " + minlon + ":" + maxlon + "");
                 //maxlat = Math.max(lat, maxlat);
             } else if (recuz.equals("RPOS")) {
-           //     System.err.println("++" + recu.getLength());
+                //     System.err.println("++" + recu.getLength());
                 planeposition.setValid(true);
                 int i = 5;
                 byte[] wrappedDatLon = new byte[]{receive[i], receive[i + 1], receive[i + 2], receive[i + 3], receive[i + 4], receive[i + 5], receive[i + 6], receive[i + 7]};
@@ -478,9 +478,17 @@ public class ConnectXplane {
 
     void putOil() throws IOException {
         sendOBJN("Resources/default scenery/sim objects/dynamic/OilPlatform.obj", 1);
+        sendOBJN("Resources/default scenery/sim objects/dynamic/OilPlatform.obj", 3);
+        sendOBJN("Resources/default scenery/sim objects/dynamic/OilPlatform.obj", 4);
+        sendOBJN("Resources/default scenery/sim objects/dynamic/OilPlatform.obj", 5);
+
         sendOBJN("Resources/default scenery/sim objects/dynamic/OilRig.obj", 2);
         //46.192479, 6.279144
         sendOBJL(1, new double[]{46.192479d, 6.279144d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
+        sendOBJL(3, new double[]{46.192479d, 6.289144d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
+        sendOBJL(4, new double[]{46.192479d, 6.299144d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
+        sendOBJL(5, new double[]{46.192479d, 6.309144d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
+
         sendOBJL(2, new double[]{46.189465d, 6.275745d, 600d}, new float[]{0f, 0f, 0f}, 1, 2f);
     }
 
