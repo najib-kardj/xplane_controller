@@ -29,8 +29,9 @@ public class Main extends javax.swing.JFrame {
      * Creates new form Main
      */
     public Main() throws SocketException, UnknownHostException, IOException {
-        connectXplane = new ConnectXplane();
+
         initComponents();
+        connectXplane = new ConnectXplane(radarMap1);
         subscribe();
     }
 
@@ -66,6 +67,9 @@ public class Main extends javax.swing.JFrame {
             connectXplane.subscribeToDataRef(9, "sim/flightmodel/position/longitude", 1);
             connectXplane.subscribeToDataRef(10, "sim/flightmodel/position/elevation", 1);
 
+            connectXplane.subscribeToWXR("80");
+            connectXplane.subscribeToPOS("1");
+
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -100,8 +104,15 @@ public class Main extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         testoilrig = new javax.swing.JButton();
         jBrakes = new javax.swing.JButton();
+        jReset = new javax.swing.JButton();
+        radarMap1 = new fr.irit.ics.circus.hamsters.xplanecontroler.RadarMap();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jLabel1.setText("jLabel1");
 
@@ -198,6 +209,24 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        jReset.setText("reset");
+        jReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jResetActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout radarMap1Layout = new javax.swing.GroupLayout(radarMap1);
+        radarMap1.setLayout(radarMap1Layout);
+        radarMap1Layout.setHorizontalGroup(
+            radarMap1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        radarMap1Layout.setVerticalGroup(
+            radarMap1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -243,12 +272,15 @@ public class Main extends javax.swing.JFrame {
                                 .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(62, 62, 62))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1)
+                            .addComponent(radarMap1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(testoilrig)
-                            .addComponent(jBrakes))
-                        .addGap(50, 50, 50))))
+                            .addComponent(jBrakes)
+                            .addComponent(jReset))
+                        .addGap(42, 42, 42))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -288,14 +320,22 @@ public class Main extends javax.swing.JFrame {
                     .addComponent(localZ))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(26, 26, 26)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(75, 75, 75)
-                        .addComponent(testoilrig)
-                        .addGap(36, 36, 36)
-                        .addComponent(jBrakes)))
-                .addContainerGap(14, Short.MAX_VALUE))
+                        .addComponent(testoilrig))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBrakes)
+                        .addGap(18, 18, 18)
+                        .addComponent(jReset)
+                        .addContainerGap(267, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(radarMap1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
 
         pack();
@@ -379,12 +419,34 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_testoilrigActionPerformed
 
     private void jBrakesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBrakesActionPerformed
-     try {
+        try {
             connectXplane.brakes();
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jBrakesActionPerformed
+
+    private void jResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jResetActionPerformed
+        try {
+            connectXplane.reset();
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jResetActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            try {
+                int id = (Integer) tableModel.getValueAt(i, 0);
+                String ref = (String) tableModel.getValueAt(i, 1);
+                connectXplane.subscribeToDataRef(1, ref, 0);
+                System.err.println("id" + id);
+                System.err.println("ref" + ref);
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
@@ -434,6 +496,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JButton jReset;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
@@ -447,6 +510,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JTextField lxtf;
     private javax.swing.JTextField lytf;
     private javax.swing.JTextField lztf;
+    private fr.irit.ics.circus.hamsters.xplanecontroler.RadarMap radarMap1;
     private javax.swing.JButton testoilrig;
     // End of variables declaration//GEN-END:variables
 }
