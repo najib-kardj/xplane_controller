@@ -67,8 +67,8 @@ public class Main extends javax.swing.JFrame {
             connectXplane.subscribeToDataRef(9, "sim/flightmodel/position/longitude", 1);
             connectXplane.subscribeToDataRef(10, "sim/flightmodel/position/elevation", 1);
 
-            connectXplane.subscribeToWXR("80");
-            connectXplane.subscribeToPOS("1");
+          //  connectXplane.subscribeToWXR("80");
+          //  connectXplane.subscribeToPOS("1");
 
         } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
